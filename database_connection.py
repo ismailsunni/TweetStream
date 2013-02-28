@@ -10,6 +10,7 @@ __copyright__ = 'imajimatika@gmail.com'
 
 import MySQLdb
 
+
 class db_conn:
     # database variable
     db_host = 'localhost'
@@ -21,7 +22,8 @@ class db_conn:
         """Init db class
         """
         self.conn = MySQLdb.connect(self.db_host, self.db_user,
-                                    self.db_password, self.db_name)
+                                    self.db_password, self.db_name,
+                                    charset='utf8', use_unicode=True)
         self.cursor = self.conn.cursor()
 
     def read(self, query):
@@ -42,13 +44,12 @@ class db_conn:
         """
 
         try:
-            print query
             self.cursor.execute(query)
-            print 'a'
             self.conn.commit()
             return True
 
         except MySQLdb.MySQLError, e:
+            print 'MySQLdb.MySQLError', e
             self.conn.rollback()
             return False
 
@@ -78,16 +79,16 @@ class db_conn:
             return False
 
     def insert_tweet(self, my_tweet_id, my_text, my_timestamp, my_category,
-                    my_sentiment, my_user_id, my_user_name, my_categorized,
-                    my_sentimented):
+                     my_sentiment, my_user_id, my_user_name, my_categorized,
+                     my_sentimented):
         my_query = 'INSERT INTO `tweets` (`tweet_id`, `text`, `time_stamp`, '
         my_query += '`category`, `sentiment`, `user_id`, `user_name`, '
         my_query += '`categorized`, `sentimented`)'
 
         my_query += ' VALUES '
 
-        my_query += '("' + my_tweet_id + '","' + my_text + '","' + str(my_timestamp) + '","' + my_category + '","'
-        my_query += str(my_sentiment) + '","' + my_user_id + '","' + my_user_name + '","' + str(my_categorized) + '","'
-        my_query += str(my_sentimented) + '")'
+        my_query += '("' + my_tweet_id + '","' + MySQLdb.escape_string(my_text) + '","' + str(my_timestamp) + '","' + my_category + '","'
+        my_query += str(my_sentiment) + '","' + my_user_id + '","' + my_user_name + '",' + str(my_categorized) + ','
+        my_query += str(my_sentimented) + ')'
 
         return self.insert(my_query)
