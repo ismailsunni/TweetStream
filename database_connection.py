@@ -12,6 +12,8 @@ import MySQLdb
 
 
 class db_conn:
+    """Class for handling database connection.
+    """
     # database variable
     db_host = 'localhost'
     db_user = 'root'
@@ -35,8 +37,9 @@ class db_conn:
             retval = self.cursor.fetchall()
             return retval
 
-        except MySQLdb.MySQLError, e:
+        except MySQLdb.MySQLError as myExc:
             self.conn.rollback()
+            print 'MySQLdb.MySQLError', myExc
             return None
 
     def insert(self, query):
@@ -48,8 +51,8 @@ class db_conn:
             self.conn.commit()
             return True
 
-        except MySQLdb.MySQLError, e:
-            print 'MySQLdb.MySQLError', e
+        except MySQLdb.MySQLError as myExc:
+            print 'MySQLdb.MySQLError', myExc
             self.conn.rollback()
             return False
 
@@ -62,8 +65,9 @@ class db_conn:
             self.conn.commit()
             return True
 
-        except MySQLdb.MySQLError, e:
+        except MySQLdb.MySQLError as myExc:
             self.conn.rollback()
+            print 'MySQLdb.MySQLError', myExc
             return False
 
     def update(self, query):
@@ -74,21 +78,25 @@ class db_conn:
             self.conn.commit()
             return True
 
-        except MySQLdb.MySQLError, e:
+        except MySQLdb.MySQLError as myExc:
+            print 'MySQLdb.MySQLError', myExc
             self.conn.rollback()
             return False
 
-    def insert_tweet(self, my_tweet_id, my_text, my_timestamp, my_category,
-                     my_sentiment, my_user_id, my_user_name, my_categorized,
+    def insert_tweet(self, my_tweet_id, my_text, my_timestamp,
+                     my_user_id, my_user_name, my_categorized,
                      my_sentimented):
+        """Insert tweet to database.
+        """
         my_query = 'INSERT INTO `tweets` (`tweet_id`, `text`, `time_stamp`, '
-        my_query += '`category`, `sentiment`, `user_id`, `user_name`, '
-        my_query += '`categorized`, `sentimented`)'
+        my_query += '`user_id`, `user_name`, `categorized`, `sentimented`)'
 
         my_query += ' VALUES '
 
-        my_query += '("' + my_tweet_id + '","' + MySQLdb.escape_string(my_text) + '","' + str(my_timestamp) + '","' + my_category + '","'
-        my_query += str(my_sentiment) + '","' + my_user_id + '","' + my_user_name + '",' + str(my_categorized) + ','
+        my_query += '("' + my_tweet_id + '","'
+        my_query += MySQLdb.escape_string(my_text) + '","'
+        my_query += str(my_timestamp) + '","' + my_user_id + '","'
+        my_query += my_user_name + '",' + str(my_categorized) + ','
         my_query += str(my_sentimented) + ')'
 
         return self.insert(my_query)

@@ -29,24 +29,26 @@ class CustomStreamListener(tweepy.StreamListener):
 
     def on_status(self, status):
         try:
-            a = self.data.insert_tweet(status.id_str, status.text,
-                                       status.created_at, '', 0,
-                                       status.user.id_str,
-                                       status.user.screen_name,
-                                       False, True)
-            print 'a', a
+            added = self.data.insert_tweet(status.id_str, status.text,
+                                           status.created_at,
+                                           status.user.id_str,
+                                           status.user.screen_name,
+                                           False, False)
+            if added:
+                print 'added new tweet...'
         except UnicodeEncodeError as e:
             print 'UnicodeEncodeError', e
             try:
                 my_normal_text = normalize('NFKD',
                                            status.text.decode('latin-1')
                                            ).encode('ascii', 'ignore')
-                b = self.data.insert_tweet(status.id_str, my_normal_text,
-                                           status.created_at, '', 0,
-                                           status.user.id_str,
-                                           status.user.screen_name,
-                                           False, True)
-                print 'b', b
+                added = self.data.insert_tweet(status.id_str, my_normal_text,
+                                               status.created_at,
+                                               status.user.id_str,
+                                               status.user.screen_name,
+                                               False, False)
+                if added:
+                    print 'added new tweet....'
             except Exception as ex:
                 print 'Exception', ex
 
@@ -63,7 +65,7 @@ def main():
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_key, access_secret)
     api = tweepy.API(auth)
-    sapi = tweepy.streaming.Stream(auth, CustomStreamListener())
+    sapi = tweepy.streaming.Stream(auth, CustomStreamListener(api))
     sapi.filter(track=['indonesia'])
 
 if __name__ == '__main__':
